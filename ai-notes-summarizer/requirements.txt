@@ -1,11 +1,8 @@
-# requirements.txt
-
-facehugger
-torch
-torchvision
+fastapi
+uvicorn
+sqlalchemy
 psycopg2-binary
+transformers
+torch
 boto3
-flask
-flask_sqlalchemy
-numpy
-pandas
+python-dotenv
