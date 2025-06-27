@@ -1,0 +1,11 @@
+# requirements.txt
+
+facehugger
+torch
+torchvision
+psycopg2-binary
+boto3
+flask
+flask_sqlalchemy
+numpy
+pandas
