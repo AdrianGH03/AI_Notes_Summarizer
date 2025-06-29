@@ -1,7 +1,7 @@
 version: '3.9'
 
 services:
-  # Backend API service
+  #Backend
   backend:
     build: 
       context: ./ai-notes-summarizer
@@ -17,7 +17,7 @@ services:
     networks:
       - app-network
 
-  # Frontend React/Vite service
+  #Frontend
   frontend:
     build:
       context: ./ai-notes-summarizer-fe
@@ -31,7 +31,7 @@ services:
     networks:
       - app-network
 
-  # PostgreSQL database service
+  #PostgreSQL database
   db:
     image: postgres:15
     restart: always

@@ -1,33 +1,19 @@
-# Git Ignore File
-# LEARN: This tells Git which files NOT to track in version control
-
-# Environment Variables (NEVER commit passwords!)
 .env
 *.env
 .env.example
 plan.txt
-# Database
 *.db
 *.sqlite3
 README.md
-# Uploads and temporary files
 uploads/
 temp/
 tmp/
 __pycache__
-
-# AWS Credentials (if accidentally created)
 .aws/
 aws-credentials.json
-
-# Model Cache (Hugging Face models can be large)
 models/
 cache/
 .cache/
-
-# Docker
 .dockerignore
-
-# Jupyter Notebooks (if you create any for testing)
 .ipynb_checkpoints/
 
