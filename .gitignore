@@ -1,2 +1,9 @@
 .env
 /FacehuggerPyTorch
+.env.example
+__pycache__
+FastAPICrashCourse
+GitHubActions
+PostgreSQLFastAPI
+
+
