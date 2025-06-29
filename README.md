@@ -36,12 +36,21 @@
 
 ---
 
+##Demo and Screenshots
+https://github.com/user-attachments/assets/6ee21e09-7643-476a-8660-75b6189be214
+
+![Screenshot 2025-06-29 002428](https://github.com/user-attachments/assets/27cb3b75-2e98-4e17-af8d-4d96a37ba5de)
+![Screenshot 2025-06-29 002709](https://github.com/user-attachments/assets/c961b496-064f-4814-b852-a523a7423f9b)
+![Screenshot 2025-06-29 002721](https://github.com/user-attachments/assets/fe38a4e5-bbfb-4b97-aeb0-b52af33408ec)
+
+---
+
 ## 🚀 How to Run Locally (with Docker)
 
 1. Clone the repository:
    ```bash
    git clone https://github.com/AdrianGH03/AI_Notes_Summarizer
-````
+   ```
 
 2. Create a `.env` file in `ai-notes-summarizer/` with:
 
