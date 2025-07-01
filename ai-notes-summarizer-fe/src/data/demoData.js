@@ -69,7 +69,7 @@ export const demoResumes = [
 ]
 
 export const demoUser = {
-  id: 999,
+  id: 2,
   email: "demo@example.com",
   resume_name: "demo_resume.pdf"
 }

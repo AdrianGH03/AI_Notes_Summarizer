@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { LogOut, Upload, FileText, Zap, Info } from 'lucide-react'
 import { resumeAPI, notesAPI } from '../services/api'
-import { demoResumes, demoSummaryResult, demoJobAd } from '../data/demoData'
+import { demoResumes, demoSummaryResult, demoJobAd, demoUser } from '../data/demoData'
 
 const Dashboard = ({ user, onLogout }) => {
   const [activeTab, setActiveTab] = useState('upload')
@@ -13,7 +13,7 @@ const Dashboard = ({ user, onLogout }) => {
   const [success, setSuccess] = useState('')
 
   //Demo mode detection
-  const isDemoMode = user.id === 999
+  const isDemoMode = user.id == 2
 
   //Job Ad summarization states
   const [jobAds, setJobAds] = useState([])
@@ -41,7 +41,6 @@ const Dashboard = ({ user, onLogout }) => {
       setResumes(userResumes)
 
     } catch {
-      console.log('No resumes found or error fetching resumes')
       setResumes([])
     }
   }, [user.id, isDemoMode])
@@ -50,15 +49,22 @@ const Dashboard = ({ user, onLogout }) => {
     let jobAdsData = []
     try {
       if (isDemoMode){
-        jobAdsData = await notesAPI.getAllJobAds(demoResumes[0].id) // <-- add await here
+        jobAdsData = await notesAPI.getAllJobAds(demoResumes[0].id) 
       } else {
         jobAdsData = await notesAPI.getAllJobAds(user.id)
+        if(!jobAdsData || jobAdsData.length === 0) {
+          return
+        }
       }
       setJobAds(jobAdsData)
     }
     catch (err) {
       console.error('Error fetching job ads:', err)
-      setError('Error fetching job ads')
+      if(!jobAdsData || jobAdsData.length === 0) {
+        return
+      } else {
+        setError(err.response?.data?.detail || 'Error fetching job ads')
+      }
     }
   }, [user.id, isDemoMode])
 
@@ -141,11 +147,15 @@ const Dashboard = ({ user, onLogout }) => {
       setSelectedResumeForImprovement('')
       setImprovements(null)
       setSummary(null)
-      fetchJobAds()
     } catch (err) {
       setError(err.response?.data?.detail || 'Error deleting job ad')
     } finally {
       setLoading(false)
+      if(jobAds.length == 1){
+        setJobAds([])
+      } else {
+        fetchJobAds()
+      }
     }
   }
 
@@ -173,22 +183,25 @@ const Dashboard = ({ user, onLogout }) => {
     try {
       let result
       if(isDemoMode){
-        result = await notesAPI.summarizeJobAd(demoResumes[0].id, jobAdText, demoSummaryResult.company_name)
+        result = await notesAPI.summarizeJobAd(demoResumes[0].id, jobAdText, (companyName ? companyName : demoSummaryResult.company_name))
       } else {
         result = await notesAPI.summarizeJobAd(user.id, jobAdText, companyName)
       }
-     
+      
       setSummary(result)
       setSuccess('Job ad summarized successfully!')
+      
     } catch (err) {
       setError(err.response?.data?.detail || 'Error summarizing job ad')
     } finally {
       setLoading(false)
+      fetchJobAds()
     }
   }
 
   const handleLoadDemoJobAd = () => {
     setJobAdText(demoJobAd)
+    setCompanyName('TechCorp Solutions')
     clearMessages()
   }
 
@@ -204,15 +217,12 @@ const Dashboard = ({ user, onLogout }) => {
         setError('')
         
         let updatedResume;
-        if(isDemoMode){
-            updatedResume = await resumeAPI.updateResumeKeywords(demoResumes[0].id, selectedResumeForImprovement, demoSummaryResult.jobad_id)
-        } else {
-            if(!summary.jobad_id) {
-                setError('Resume improvement feature requires a job ad ID from the database. Please contact support.')
-                return
-            }
-            updatedResume = await resumeAPI.updateResumeKeywords(user.id, selectedResumeForImprovement, summary.jobad_id)
+      
+        if(!summary.jobad_id) {
+            setError('Resume improvement feature requires a job ad ID from the database. Please contact support.')
+            return
         }
+        updatedResume = await resumeAPI.updateResumeKeywords((user.id || demoUser.id), selectedResumeForImprovement, summary.jobad_id)
         
         if (updatedResume) {
             setSuccess('Resume improvement suggestions retrieved successfully!')
@@ -281,8 +291,8 @@ const Dashboard = ({ user, onLogout }) => {
         </nav>
 
         <main className="dashboard-main">
-          {error && <div className="error-message">{error}</div>}
-          {success && <div className="success-message">{success}</div>}
+          {error && <div className="error-message" style={{ color: 'red' }}>{error}</div>}
+          {success && <div className="success-message" style={{ color: 'lime' }}>{success}</div>}
 
           {isDemoMode && (
             <div className="demo-info">
@@ -380,19 +390,19 @@ const Dashboard = ({ user, onLogout }) => {
                 </div>
               )}
 
-              <div className="input-group">
-                <label htmlFor="companyName">Company Name</label>
-                <input
-                  type="text"
-                  id="companyName"
-                  value={companyName}
-                  onChange={(e) => setCompanyName(e.target.value)}
-                  placeholder="Enter a name for this company"
-                  required
-                />
-              </div>
 
               <form onSubmit={handleJobAdSummarize} className="summarize-form">
+                <div className="input-group">
+                  <label htmlFor="companyName">Company Name</label>
+                  <input
+                    type="text"
+                    id="companyName"
+                    value={companyName}
+                    onChange={(e) => setCompanyName(e.target.value)}
+                    placeholder="Enter a name for this company"
+                    required
+                  />
+                </div>
                 <div className="input-group">
                   <label htmlFor="jobAdText">Job Advertisement Text</label>
                   <textarea
@@ -421,21 +431,34 @@ const Dashboard = ({ user, onLogout }) => {
                 }}
               >
                 <h3>Your Job Ads</h3>
-                {jobAds.length > 0 ? (
+                {!loading && (
+                  jobAds.length > 0 ? (
                   <ul>
                     {jobAds.map((jobad) => (
                       <li
-                        key={jobad.id}
+                        key={jobad.jobad_id}
                         className="resume-item"
-                        onMouseEnter={() => setHoveredJobAdId(jobad.id)}
+                        onMouseEnter={() => setHoveredJobAdId(jobad.jobad_id)}
                         onMouseLeave={() => setHoveredJobAdId(null)}
                       >
-                        <span>{jobad ? (jobad.company_name ? jobad.company_name : `Company #${jobad.id}`) : ''}</span>
+                        <span
+                          onClick={() => {
+                            setJobAdText(jobad.original_text)
+                            setCompanyName(jobad.company_name || '')
+                            clearMessages()
+                            setSummary(jobad)
+                            setImprovements(null)
+                          }}
+                          style={{ cursor: 'pointer', textDecoration: 'underline', color: 'blue' }}
+                        
+                        >
+                          {jobad ? (jobad.company_name ? jobad.company_name : `Company #${jobad.id}`) : ''}
+                        </span>
                         <span className="upload-date">
-                          {hoveredJobAdId === jobad.id ? (
+                          {hoveredJobAdId === jobad.jobad_id ? (
                             <span
                               style={{ color: 'red', cursor: 'pointer' }}
-                              onClick={() => handleDeleteJobAd(jobad.id)}
+                              onClick={() => handleDeleteJobAd(jobad.jobad_id)}
                             >
                               Delete
                             </span>
@@ -447,8 +470,8 @@ const Dashboard = ({ user, onLogout }) => {
                     ))}
                   </ul>
                 ) : (
-                  <p>No Job Ads summarized yet.</p>
-                )}
+                  <p style={{color: 'red'}}>No Job Ads summarized yet.</p>
+                ))}
               </div>
             
               

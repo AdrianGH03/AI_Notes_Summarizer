@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Form, Depends
 from ..services.summarizer import summarize_and_keywords
-from ..db.crud import save_jobad_summary, get_jobad_by_user_and_text
+from ..db.crud import save_jobad_summary, get_jobad_by_user_and_text, get_jobad_by_company_and_text
 from ..db.connection import SessionLocal
 from ..db.models import JobAd
 from typing import Optional
@@ -21,6 +21,10 @@ def get_db():
 async def summarize_notes(user_id: int = Form(...), text: Optional[str] = Form(None), company_name: Optional[str] = Form(None), db=Depends(get_db)):
     if not text:
         raise HTTPException(status_code=400, detail="Text is required for summarization")
+    
+    existing_ad = get_jobad_by_company_and_text(db, company_name, text) if company_name else None
+    if existing_ad:
+        raise HTTPException(status_code=409, detail="Job ad with this text already exists")
     
     existing = get_jobad_by_user_and_text(db, user_id, text)
     if existing:
@@ -66,10 +70,13 @@ async def get_summaries_list(user_id: int, db=Depends(get_db)):
     
     return [
         {
-            "id": job_ad.id,
+            "jobad_id": job_ad.id,
             "original_text": job_ad.original_text,
             "summarized_text": job_ad.summarized_text,
-            "company_name": job_ad.company_name if job_ad.company_name else f"Company #{job_ad.id}"
+            "company_name": job_ad.company_name if job_ad.company_name else f"Company #{job_ad.id}",
+            "keywords": job_ad.keywords,
+            "requirements": job_ad.requirements,
+            "user_id": job_ad.user_id,
         }
         for job_ad in summaries
     ]

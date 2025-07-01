@@ -48,7 +48,8 @@ def save_jobad_summary(db: Session, job_ad: dict):
         user_id=job_ad['user_id'],
         summarized_text=job_ad.get('summarized_text'),
         keywords=job_ad.get('keywords'),
-        requirements=job_ad.get('requirements')
+        requirements=job_ad.get('requirements'),
+        company_name=job_ad.get('company_name')
     )
     db.add(new_job_ad)
     db.commit()
@@ -58,4 +59,5 @@ def save_jobad_summary(db: Session, job_ad: dict):
 def get_jobad_by_user_and_text(db: Session, user_id: int, original_text: str):
     return db.query(JobAd).filter(JobAd.user_id == user_id, JobAd.original_text == original_text).first()
 
-
+def get_jobad_by_company_and_text(db: Session, company_name: str, original_text: str):
+    return db.query(JobAd).filter(JobAd.company_name == company_name, JobAd.original_text == original_text).first()

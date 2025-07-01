@@ -48,7 +48,19 @@ def extract_keywords(text: str, top_k: int = 10) -> List[str]:
     words = cleaned.split()
     #Stop common words in sentences from being counted as keywords
     stopwords = set([
-        "the", "and", "is", "in", "to", "of", "a", "for", "on", "with", "as", "by", "an", "at", "from", "or", "that", "it"
+        "the", "and", "is", "in", "to", "of", "a", "for", "on", "with", "as", "by", "an", "at", "from", "or", "that", "it",
+        "this", "are", "be", "was", "were", "but", "not", "all", "can", "if", "has", "have", "more", "than", "so",
+        "about", "which", "who", "what", "when", "where", "why", "how", "there", "their", "they", "you", "your",
+        "he", "she", "we", "us", "my", "me", "his", "her", "its", "our", "them", "themself", "themselves",
+        "such", "some", "any", "every", "no", "none", "one", "two", "three", "first", "second", "last", "next", "previous",
+        "will", "shall", "may", "might", "could", "would", "should", "must", "can", "do", "does", "did",
+        "like", "just", "also", "very", "really", "quite", "too", "enough", "moreover", "further", "however", "therefore", "thus", "hence",
+        "so", "then", "now", "but", "although", "despite", "while", "because", "since", "until", "unless", "if", "though",
+        "whereas", "after", "before", "during", "as soon as", "as long as", "in case", "if", "unless", "provided that", "assuming that",
+        "also", "just", "only", "even", "still", "now", "then", "therefore", "thus", "hence", "moreover", "furthermore", "however", "although", "despite", "while",
+        "because", "since", "until", "unless", "if", "though", "although", "whereas", "while", "after", "before", "during", "until", "since", "as soon as", "as long as", "in case",
+        "if", "unless", "provided that", "assuming that", "in the event that", "in case of", "in the meantime", "meanwhile", "eventually", "finally", "ultimately",
+        "therefore", "thus", "hence", "consequently", "accordingly", "as a result", "in conclusion", "to summarize", "to sum up", "in short", "in brief"
     ])
     filtered_words = [word for word in words if word not in stopwords and len(word) > 2]
     freq = {}

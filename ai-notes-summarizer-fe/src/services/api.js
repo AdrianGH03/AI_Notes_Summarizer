@@ -91,9 +91,8 @@ export const notesAPI = {
     const formData = new FormData()
     formData.append('user_id', userId)
     formData.append('text', text)
-    if (company_name) {
-      formData.append('company_name', company_name)
-    }
+    formData.append('company_name', company_name)
+    
 
     const response = await axios.post(`${API_BASE_URL}/notes/summarize`, formData, {
       headers: {
