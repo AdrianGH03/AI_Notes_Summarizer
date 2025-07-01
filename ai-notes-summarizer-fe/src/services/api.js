@@ -87,16 +87,29 @@ export const resumeAPI = {
 
 //Notes endpoints
 export const notesAPI = {
-  summarizeJobAd: async (userId, text) => {
+  summarizeJobAd: async (userId, text, company_name) => {
     const formData = new FormData()
     formData.append('user_id', userId)
     formData.append('text', text)
+    if (company_name) {
+      formData.append('company_name', company_name)
+    }
 
     const response = await axios.post(`${API_BASE_URL}/notes/summarize`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
     })
+    return response.data
+  },
+
+  getAllJobAds: async (userId) => {
+    const response = await api.get(`/notes/summaries-list/${userId}`)
+    return response.data
+  },
+
+  deleteJobAd: async (userId, jobadId) => {
+    const response = await api.delete(`/notes/delete/${jobadId}/${userId}`)
     return response.data
   }
 }

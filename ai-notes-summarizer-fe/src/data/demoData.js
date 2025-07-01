@@ -56,6 +56,7 @@ export const demoSummaryResult = {
   requirements: "5+ years software development experience, proficiency in modern programming languages and frameworks, database knowledge, cloud platform experience, containerization skills, version control proficiency, strong problem-solving abilities, and excellent communication skills. Bachelor's degree preferred.",
   message: "Demo data - showing example job ad analysis",
   jobad_id: 3,
+  company_name: "TechCorp Solutions"
 }
 
 export const demoResumes = [

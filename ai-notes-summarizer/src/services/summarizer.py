@@ -36,6 +36,10 @@ def clean_text(text: str) -> str:
 
 def summarize_text(text: str) -> str:
     cleaned = clean_text(text)
+    if not cleaned or len(cleaned.split()) < 10:
+        raise ValueError("Text too short for summarization.")
+    if len(cleaned.split()) > 1024:
+        raise ValueError("Text too long for summarization.")
     result = summarizer(cleaned, max_length=100, min_length=30, do_sample=False)
     return result[0]['summary_text']
 

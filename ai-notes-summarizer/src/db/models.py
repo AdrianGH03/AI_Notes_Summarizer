@@ -24,6 +24,7 @@ class JobAd(Base):
     summarized_text = Column(Text, nullable=True)
     keywords = Column(Text, nullable=True)
     requirements = Column(Text, nullable=True)
+    company_name = Column(String, nullable=True)
     
 
 

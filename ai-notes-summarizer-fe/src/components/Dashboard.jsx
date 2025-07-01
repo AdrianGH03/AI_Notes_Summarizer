@@ -15,6 +15,11 @@ const Dashboard = ({ user, onLogout }) => {
   //Demo mode detection
   const isDemoMode = user.id === 999
 
+  //Job Ad summarization states
+  const [jobAds, setJobAds] = useState([])
+  const [hoveredJobAdId, setHoveredJobAdId] = useState(null)
+  const [companyName, setCompanyName] = useState('')
+
   //Resume upload states
   const [selectedFile, setSelectedFile] = useState(null)
   const [resumeName, setResumeName] = useState('')
@@ -41,9 +46,26 @@ const Dashboard = ({ user, onLogout }) => {
     }
   }, [user.id, isDemoMode])
 
+  const fetchJobAds = useCallback(async () => {
+    let jobAdsData = []
+    try {
+      if (isDemoMode){
+        jobAdsData = await notesAPI.getAllJobAds(demoResumes[0].id) // <-- add await here
+      } else {
+        jobAdsData = await notesAPI.getAllJobAds(user.id)
+      }
+      setJobAds(jobAdsData)
+    }
+    catch (err) {
+      console.error('Error fetching job ads:', err)
+      setError('Error fetching job ads')
+    }
+  }, [user.id, isDemoMode])
+
   useEffect(() => {
     fetchUserResumes()
-  }, [fetchUserResumes])
+    fetchJobAds()
+  }, [fetchUserResumes, fetchJobAds])
 
   //Upload file
   const handleFileUpload = async (e) => {
@@ -101,12 +123,42 @@ const Dashboard = ({ user, onLogout }) => {
     }
   }
 
+  const handleDeleteJobAd = async (jobAdId) => {
+    if (!jobAdId) {
+      setError('Please select a job ad to delete')
+      return
+    }
+    setLoading(true)
+    setError('')
+    setSuccess('')
+    try {
+      if (isDemoMode) {
+        await notesAPI.deleteJobAd(demoResumes[0].id, jobAdId)
+      } else {
+        await notesAPI.deleteJobAd(user.id, jobAdId)
+      }
+      setSuccess('Job ad deleted successfully!')
+      setSelectedResumeForImprovement('')
+      setImprovements(null)
+      setSummary(null)
+      fetchJobAds()
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Error deleting job ad')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   //Summarize job ad
   const handleJobAdSummarize = async (e) => {
     e.preventDefault()
     
     if (!jobAdText.trim()) {
       setError('Please enter job ad text')
+      return
+    }
+    if (!companyName.trim()) {
+      setError('Please enter a company name')
       return
     }
 
@@ -121,9 +173,9 @@ const Dashboard = ({ user, onLogout }) => {
     try {
       let result
       if(isDemoMode){
-        result = await notesAPI.summarizeJobAd(demoResumes[0].id, jobAdText)
+        result = await notesAPI.summarizeJobAd(demoResumes[0].id, jobAdText, demoSummaryResult.company_name)
       } else {
-        result = await notesAPI.summarizeJobAd(user.id, jobAdText)
+        result = await notesAPI.summarizeJobAd(user.id, jobAdText, companyName)
       }
      
       setSummary(result)
@@ -328,6 +380,18 @@ const Dashboard = ({ user, onLogout }) => {
                 </div>
               )}
 
+              <div className="input-group">
+                <label htmlFor="companyName">Company Name</label>
+                <input
+                  type="text"
+                  id="companyName"
+                  value={companyName}
+                  onChange={(e) => setCompanyName(e.target.value)}
+                  placeholder="Enter a name for this company"
+                  required
+                />
+              </div>
+
               <form onSubmit={handleJobAdSummarize} className="summarize-form">
                 <div className="input-group">
                   <label htmlFor="jobAdText">Job Advertisement Text</label>
@@ -344,7 +408,51 @@ const Dashboard = ({ user, onLogout }) => {
                 <button type="submit" disabled={loading} className="submit-button">
                   {loading ? 'Summarizing...' : 'Summarize Job Ad'}
                 </button>
+
               </form>
+
+              {/* DO NOT CONFUSE WITH RESUMES LIST, SIMILAR BUT NEEDS SAME STYLING */}
+              <div
+                className="resumes-list"
+                style={{
+                  maxHeight: '300px',
+                  overflowY: 'auto',
+                  overflowX: 'hidden'
+                }}
+              >
+                <h3>Your Job Ads</h3>
+                {jobAds.length > 0 ? (
+                  <ul>
+                    {jobAds.map((jobad) => (
+                      <li
+                        key={jobad.id}
+                        className="resume-item"
+                        onMouseEnter={() => setHoveredJobAdId(jobad.id)}
+                        onMouseLeave={() => setHoveredJobAdId(null)}
+                      >
+                        <span>{jobad ? (jobad.company_name ? jobad.company_name : `Company #${jobad.id}`) : ''}</span>
+                        <span className="upload-date">
+                          {hoveredJobAdId === jobad.id ? (
+                            <span
+                              style={{ color: 'red', cursor: 'pointer' }}
+                              onClick={() => handleDeleteJobAd(jobad.id)}
+                            >
+                              Delete
+                            </span>
+                          ) : (
+                            'Summarized'
+                          )}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p>No Job Ads summarized yet.</p>
+                )}
+              </div>
+            
+              
+
 
               {summary && (
                 <div className="summary-results">
@@ -377,6 +485,7 @@ const Dashboard = ({ user, onLogout }) => {
                     </div>
                   )}
                 </div>
+                
               )}
             </div>
           )}
