@@ -39,7 +39,8 @@
 ## 🎥 Demo and Screenshots
 
 ![Screenshot 2025-06-29 002709](https://github.com/user-attachments/assets/c961b496-064f-4814-b852-a523a7423f9b)
-![Screenshot 2025-06-29 002721](https://github.com/user-attachments/assets/fe38a4e5-bbfb-4b97-aeb0-b52af33408ec)
+![image](https://github.com/user-attachments/assets/f62fa0d0-3009-46a9-ba68-ffed392df38d)
+
 
 https://github.com/user-attachments/assets/90b96ff6-25cd-4784-b0b3-b461f32675d4
 
